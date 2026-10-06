@@ -53,7 +53,19 @@ class Unit:
             print(f"Юніт {self.name} був знищений")
 
     def attack(self, target) -> int:
-        pass
+        if not self.is_alive:
+            print(f"{self.name} не можу атакувати, оскільки знищений")
+            return 0
+
+        cost = 2
+        if self.action_points <cost:
+            print(f"Недостатньо очок дій для атаки юнітом {self.name}")
+            return 0
+
+        self.action_points -= cost
+        print(f"{self.name} атакує {target.name} із силою {self.attack_power} (витрачено {cost} AP)")
+        target.take_damage(self.attack_power)
+        return self.attack_power
 
     def reset_turn(self):
         self.action_points = self.speed
@@ -61,17 +73,16 @@ class Unit:
 
 if __name__ == "__main__":
     warrior = Unit(name="Андрій", health=100, attack_power=20, speed=5, x=0, y=0 )
+    enemy = Unit(name="Ворог", health=40, attack_power=10, speed=3, x=1, y=1 )
+
+    #ТЕСТ
+    print("\n Демонмстрація переміщення ")
+    warrior.move(1,0)
+
+    print("\n Демонстрація атаки ")
+    warrior.attack(enemy)
+    warrior.attack(enemy)
+
+    print("\n Ластовий стан ")
     print(warrior.get_info())
-
-    #перевірка переміщення
-    warrior.move(2,3)
-
-    # перевірка отримання домагу
-    warrior.take_damage(40)
-    print(warrior.get_info())
-
-    warrior.take_damage(60)
-    print(warrior.get_info())
-
-    #скидання ходу
-    warrior.reset_turn()
+    print(enemy.get_info())
