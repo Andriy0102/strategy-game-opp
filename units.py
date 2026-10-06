@@ -40,7 +40,17 @@ class Unit:
         return True
 
     def take_damage(self, damage: int):
-        pass
+        if not self.is_alive:
+            print(f"{self.name} уже знищений і не може отримувати шкоду")
+            return
+
+        self.health -= damage
+        print(f"{self.name} отримав {damage} пошкодження. Залишилося HP {max(0, self.health)}")
+
+        if self.health <= 0:
+            self.health =0
+            self.is_alive = False
+            print(f"Юніт {self.name} був знищений")
 
     def attack(self, target) -> int:
         pass
@@ -55,7 +65,12 @@ if __name__ == "__main__":
 
     #перевірка переміщення
     warrior.move(2,3)
-    warrior.move(4, 5)
+
+    # перевірка отримання домагу
+    warrior.take_damage(40)
+    print(warrior.get_info())
+
+    warrior.take_damage(60)
     print(warrior.get_info())
 
     #скидання ходу
