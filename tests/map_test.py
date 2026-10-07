@@ -53,11 +53,40 @@ class MapTest(unittest.TestCase):
 
 
 class TileTest(unittest.TestCase):
-    pass
+    def test_position_and_validation(self):
+        tile = Tile(q=2, r=3, terrain_name="Forest")
+        self.assertEqual(tile.position, (2, 3))
+
+        with self.assertRaises(ValueError):
+            tile.position = (-1, 0)
+
+        with self.assertRaises(TypeError):
+            tile.position = "invalid" 
+
+    def test_resource(self):
+        tile = Tile(1, 1)
+        self.assertIsNone(tile.resource)
+        tile.resource = Resources("Stone", 40)
+        self.assertIsNotNone(tile.resource)
 
 
 class ResourcesTest(unittest.TestCase):
-    pass
+    def test_init_and_validation(self):
+        res = Resources("Gold", 100)
+        self.assertEqual(res.res_type, "Gold")
+        self.assertEqual(res.amount, 100)
+
+        with self.assertRaises(ValueError):
+            res.amount = -50
+
+    def test_collect(self):
+        res = Resources("Wood", 50)
+        self.assertEqual(res.collect(20), 20)
+        self.assertEqual(res.amount, 30)
+
+        self.assertEqual(res.collect(100), 30)
+        self.assertEqual(res.amount, 0)
+        self.assertEqual(res.collect(-10), 0)
 
 if __name__ == '__main__':
     unittest.main()
