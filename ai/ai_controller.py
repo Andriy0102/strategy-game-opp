@@ -6,7 +6,6 @@ class AIController:
             self._difficulty = "easy"
 
         self._turn_count = 0
-        print("AIController created")
 
     def set_difficulty(self, difficulty):
         if difficulty in ("easy", "medium", "hard"):
@@ -39,15 +38,12 @@ class AIController:
     def get_turn_count(self):
         return self._turn_count
 
-    def __del__(self):
-        print("AIController object destroyed")
 
 class AIUnitBehavior:
     def __init__(self, unit_name, health=100):
         self._unit_name = unit_name
         self._health = health
         self._action = "wait"
-        print("AIUnitBehavior created")
 
     def get_unit_name(self):
         return self._unit_name
@@ -65,7 +61,8 @@ class AIUnitBehavior:
             self._health = health
 
     def take_damage(self, damage):
-        self._health -= damage
+        if damage > 0:
+            self._health -= damage
 
         if self._health <= 0:
             self._health = 0
@@ -90,6 +87,3 @@ class AIUnitBehavior:
 
     def is_alive(self):
         return self._health > 0
-
-    def __del__(self):
-        print("AIUnitBehavior destroyed")
