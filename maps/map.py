@@ -127,7 +127,7 @@ class Resources:
         self.__amount = value
 
     #Safely deducts resources and returns the amount actually collected
-    def collect(self, requested_amount) -> int:
+    def collect(self, requested_amount: int) -> int:
         if requested_amount <= 0:
             return 0
         elif requested_amount > self.amount:

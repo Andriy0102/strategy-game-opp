@@ -1,4 +1,4 @@
-from map import Map, Tile, Resources
+from maps.map import Map, Tile, Resources
 
 
 class MapEditor:
