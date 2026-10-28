@@ -99,6 +99,12 @@ class Squad:
         if not alive:
             return False
 
+        if all(u.action_points >= cost for u in alive):
+            for u in alive:
+                u.move(u.x + 1, u.y)
+            return True
+        return False
+
 
 if __name__ == "__main__":
     warrior = Unit(name="Андрій", health=100, attack_power=20, speed=5, x=0, y=0 )
