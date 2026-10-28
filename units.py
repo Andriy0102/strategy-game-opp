@@ -77,6 +77,27 @@ class Squad:
         self.name = name
         self.units: list[Unit] = []
 
+    def add_unit(self, unit: Unit) -> None:
+        if unit not in self.units:
+            self.units.append(unit)
+
+    def remove_unit(self, unit: Unit) -> None:
+        if unit in self.units:
+            self.units.remove(unit)
+
+    def get_alive_units(self) -> list[Unit]:
+        pass
+
+    def get_total_health(self) -> int:
+        pass
+
+    def clear_dead_units(self) -> None:
+        pass
+
+    def move_squad(self, cost: int = 1) -> bool:
+        pass
+
+
 if __name__ == "__main__":
     warrior = Unit(name="Андрій", health=100, attack_power=20, speed=5, x=0, y=0 )
     enemy = Unit(name="Ворог", health=40, attack_power=10, speed=3, x=1, y=1 )
