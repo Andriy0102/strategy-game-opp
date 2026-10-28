@@ -6,6 +6,17 @@ class AIController:
             self._difficulty = "easy"
 
         self._turn_count = 0
+        self._behaviors = []
+
+    def add_behavior(self, behavior):
+        self._behaviors.append(behavior)
+
+    def remove_behavior(self, behavior):
+        if behavior in self._behaviors:
+            self._behaviors.remove(behavior)
+
+    def get_behaviors_count(self):
+        return len(self._behaviors)
 
     def set_difficulty(self, difficulty):
         if difficulty in ("easy", "medium", "hard"):
@@ -22,59 +33,36 @@ class AIController:
         else:
             return 7
 
-    def choose_action(self, enemy_in_range, resource_nearby):
-        if enemy_in_range:
-            return "attack"
-
-        if resource_nearby and self._difficulty != "easy":
-            return "collect_resource"
-
-        return "move"
 
     def make_turn(self, enemy_in_range, resource_nearby):
         self._turn_count += 1
-        return self.choose_action(enemy_in_range, resource_nearby)
+        actions = []
+        for behavior in self._behaviors:
+            action = behavior.choose_action(enemy_in_range, resource_nearby)
+        return actions
 
     def get_turn_count(self):
         return self._turn_count
 
 
 class AIUnitBehavior:
-    def __init__(self, unit_name, health=100):
-        self._unit_name = unit_name
-        self._health = health
+    def __init__(self):
+        self._unit = unit
         self._action = "wait"
 
-    def get_unit_name(self):
-        return self._unit_name
-
-    def get_health(self):
-        return self._health
+    def get_unit(self):
+        return self._unit
 
     def get_action(self):
         return self._action
 
-    def set_health(self, health):
-        if health < 0:
-            self._health = 0
-        else:
-            self._health = health
-
-    def take_damage(self, damage):
-        if damage > 0:
-            self._health -= damage
-
-        if self._health <= 0:
-            self._health = 0
-
     def choose_action(self, enemy_in_range, resource_nearby):
-        if self._health == 0:
+        if not self._unit.is_alive:
             self._action = "dead"
 
-        elif self._health <= 25:
+        elif self._unit.health <= 25:
             self._action = "retreat"
-
-        elif enemy_in_range:
+        if enemy_in_range:
             self._action = "attack"
 
         elif resource_nearby:
@@ -84,6 +72,3 @@ class AIUnitBehavior:
             self._action = "move"
 
         return self._action
-
-    def is_alive(self):
-        return self._health > 0
