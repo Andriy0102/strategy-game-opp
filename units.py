@@ -71,6 +71,12 @@ class Unit:
         self.action_points = self.speed
         print(f"Хід юніта {self.name} оновлено. Очки дій відновлено до {self.action_points}")
 
+class Squad:
+
+    def __init__(self, name: str):
+        self.name = name
+        self.units: list[Unit] = []
+
 if __name__ == "__main__":
     warrior = Unit(name="Андрій", health=100, attack_power=20, speed=5, x=0, y=0 )
     enemy = Unit(name="Ворог", health=40, attack_power=10, speed=3, x=1, y=1 )
