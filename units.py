@@ -86,16 +86,18 @@ class Squad:
             self.units.remove(unit)
 
     def get_alive_units(self) -> list[Unit]:
-        pass
+        return [u for u in self.units if u.is_alive]
 
     def get_total_health(self) -> int:
-        pass
+        return sum(u.health for u in self.get_alive_units())
 
     def clear_dead_units(self) -> None:
-        pass
+        self.units = [u for u in self.units if u.is_alive]
 
     def move_squad(self, cost: int = 1) -> bool:
-        pass
+        alive = self.get_alive_units()
+        if not alive:
+            return False
 
 
 if __name__ == "__main__":
