@@ -1,5 +1,5 @@
 import unittest
-from units import Unit
+from units import Unit, Squad
 
 class UnitsTest(unittest.TestCase):
     def setUp(self):
@@ -31,6 +31,16 @@ class UnitsTest(unittest.TestCase):
         self.warrior.move(1,1)
         self.warrior.reset_turn()
         self.assertEqual(self.warrior.action_points, 5)
+
+    def test_squad_add_remove(self):
+        squad = Squad("Гама")
+        unit1 = Unit("Knight", 100, 20, 3, 0, 0)
+
+        squad.add_unit(unit1)
+        self.assertEqual(len(squad.units), 1)
+
+        squad.remove_unit(unit1)
+        self.assertEqual(len(squad.units), 0)
 
 
 if __name__ == "__main__":
