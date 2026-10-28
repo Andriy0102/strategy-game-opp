@@ -18,7 +18,6 @@ def test_invalid_difficulty():
 
 def test_set_difficulty():
     ai = AIController()
-
     ai.set_difficulty("hard")
 
     assert ai.get_difficulty() == "hard"
@@ -36,10 +35,8 @@ def test_enemy_squad_size():
 
 def test_add_behavior():
     ai = AIController()
-
     unit = Unit("Soldier", 100, 20, 5)
     behavior = AIUnitBehavior(unit)
-
     ai.add_behavior(behavior)
 
     assert ai.get_behavior_count() == 1
@@ -47,10 +44,8 @@ def test_add_behavior():
 
 def test_remove_behavior():
     ai = AIController()
-
     unit = Unit("Soldier", 100, 20, 5)
     behavior = AIUnitBehavior(unit)
-
     ai.add_behavior(behavior)
     ai.remove_behavior(behavior)
 
@@ -68,7 +63,6 @@ def test_behavior_unit():
 def test_attack_action():
     unit = Unit("Soldier", 100, 20, 5)
     behavior = AIUnitBehavior(unit)
-
     action = behavior.choose_action(True, False, "medium")
 
     assert action == "attack"
@@ -77,7 +71,6 @@ def test_attack_action():
 def test_collect_resource():
     unit = Unit("Soldier", 100, 20, 5)
     behavior = AIUnitBehavior(unit)
-
     action = behavior.choose_action(False, True, "medium")
 
     assert action == "collect_resource"
@@ -86,7 +79,6 @@ def test_collect_resource():
 def test_easy_ai_does_not_collect_resource():
     unit = Unit("Soldier", 100, 20, 5)
     behavior = AIUnitBehavior(unit)
-
     action = behavior.choose_action(False, True, "easy")
 
     assert action == "move"
@@ -95,7 +87,6 @@ def test_easy_ai_does_not_collect_resource():
 def test_move_action():
     unit = Unit("Soldier", 100, 20, 5)
     behavior = AIUnitBehavior(unit)
-
     action = behavior.choose_action(False, False, "medium")
 
     assert action == "move"
@@ -104,7 +95,6 @@ def test_move_action():
 def test_retreat_action():
     unit = Unit("Soldier", 20, 20, 5)
     behavior = AIUnitBehavior(unit)
-
     action = behavior.choose_action(True, False, "medium")
 
     assert action == "retreat"
@@ -113,9 +103,7 @@ def test_retreat_action():
 def test_dead_unit():
     unit = Unit("Soldier", 10, 20, 5)
     unit.take_damage(20)
-
     behavior = AIUnitBehavior(unit)
-
     action = behavior.choose_action(True, True, "medium")
 
     assert action == "dead"
@@ -123,16 +111,12 @@ def test_dead_unit():
 
 def test_make_turn():
     ai = AIController("medium")
-
     unit1 = Unit("Soldier 1", 100, 20, 5)
     unit2 = Unit("Soldier 2", 20, 20, 5)
-
     behavior1 = AIUnitBehavior(unit1)
     behavior2 = AIUnitBehavior(unit2)
-
     ai.add_behavior(behavior1)
     ai.add_behavior(behavior2)
-
     actions = ai.make_turn(True, False)
 
     assert actions == ["attack", "retreat"]

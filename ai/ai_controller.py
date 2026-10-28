@@ -15,7 +15,7 @@ class AIController:
         if behavior in self._behaviors:
             self._behaviors.remove(behavior)
 
-    def get_behaviors_count(self):
+    def get_behavior_count(self):
         return len(self._behaviors)
 
     def set_difficulty(self, difficulty):
@@ -39,6 +39,7 @@ class AIController:
         actions = []
         for behavior in self._behaviors:
             action = behavior.choose_action(enemy_in_range, resource_nearby)
+            actions.append(action)
         return actions
 
     def get_turn_count(self):
@@ -46,7 +47,7 @@ class AIController:
 
 
 class AIUnitBehavior:
-    def __init__(self):
+    def __init__(self, unit):
         self._unit = unit
         self._action = "wait"
 
@@ -56,16 +57,16 @@ class AIUnitBehavior:
     def get_action(self):
         return self._action
 
-    def choose_action(self, enemy_in_range, resource_nearby):
+    def choose_action(self, enemy_in_range, resource_nearby, difficulty ="easy"):
         if not self._unit.is_alive:
             self._action = "dead"
 
         elif self._unit.health <= 25:
             self._action = "retreat"
-        if enemy_in_range:
+        elif enemy_in_range:
             self._action = "attack"
 
-        elif resource_nearby:
+        elif resource_nearby and difficulty != "easy":
             self._action = "collect_resource"
 
         else:
