@@ -1,5 +1,4 @@
-from .tiles import Tile, Terrain
-from .resources import Resources
+from .tiles import Tile, Pickup
 
 
 class Map:
@@ -39,6 +38,15 @@ class Map:
         tile = self.get_tile(position)
         return tile.is_passable if tile else False
 
+    def take_pickup(self, position:tuple[int, int]) -> Pickup | None:
+        tile = self.get_tile(position)
+        if not tile or not tile.pickup:
+            return None
+
+        item = tile.pickup
+        tile.pickup = None
+        return item
+
     #Collect resource
     def harvest_resource(self, position:tuple[int, int], requested_amount: int) -> int:
         tile = self.get_tile(position)
@@ -67,6 +75,20 @@ class Map:
         neighbors = [(q + dq, r + dr) for dq, dr in vertical + horizontal]
         return [pos for pos in neighbors if self.is_valid_position(pos)]
 
+    def add_lane(self, lane: "Lane"):
+        self.lanes.append(lane)
+
+    def add_base(self, base: "Base"):
+        if len(self.bases) >= 2:
+            raise ValueError("Map can only have 2 bases (Good and Evil)!")
+        self.bases.append(base)
+
+    def get_base_by_team(self, team: str) -> Base | None:
+        for base in self.bases:
+            if base.team == team:
+                return base
+        return None
+
     def __repr__(self):
         return f'Map({self.width}, {self.height})'
 
@@ -75,10 +97,10 @@ class Lane:
     def __init__(self, name: str, has_bridge: bool = False):
         self.name = name # "Top", "Middle", "Bottom"
         self.has_bridge = has_bridge
-        self.titles: list[Tile] = [] #Ordered list of line tiles
+        self.tiles: list[Tile] = [] #Ordered list of line tiles
 
     def add_tile(self, tile: Tile):
-        self.titles.append(tile)
+        self.tiles.append(tile)
 
     def __repr__(self):
         return f"Lane({self.name}, bridge={self.has_bridge}, tiles_count={len(self.tiles)})"
