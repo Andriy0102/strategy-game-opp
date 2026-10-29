@@ -117,6 +117,12 @@ class Squad:
         total_count = len(self.units)
         return f"Загін '{self.name}' [{alive_count}/{total_count} живих | Загальне HP: {self.get_total_health()}] "
 
+    def __len__(self) -> int:
+        return len(self.units)
+
+    def __getitem__(self,index: int) -> Unit:
+        return self.units[index]
+
 
 if __name__ == "__main__":
     warrior = Unit(name="Андрій", health=100, attack_power=20, speed=5, x=0, y=0 )
