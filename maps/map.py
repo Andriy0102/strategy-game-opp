@@ -83,6 +83,9 @@ class Map:
             raise ValueError("Map can only have 2 bases (Good and Evil)!")
         self.bases.append(base)
 
+    def add_spawn_point(self, spawn_point: "SpawnPoint"):
+        self.spawn_points.append(spawn_point)
+
     def get_base_by_team(self, team: str) -> Base | None:
         for base in self.bases:
             if base.team == team:
