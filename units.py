@@ -71,6 +71,59 @@ class Unit:
         self.action_points = self.speed
         print(f"Хід юніта {self.name} оновлено. Очки дій відновлено до {self.action_points}")
 
+class Squad:
+
+    def __init__(self, name: str):
+        self.name = name
+        self.units: list[Unit] = []
+
+    def add_unit(self, unit: Unit) -> None:
+        if unit not in self.units:
+            self.units.append(unit)
+
+    def remove_unit(self, unit: Unit) -> None:
+        if unit in self.units:
+            self.units.remove(unit)
+
+    def get_alive_units(self) -> list[Unit]:
+        return [u for u in self.units if u.is_alive]
+
+    def get_total_health(self) -> int:
+        return sum(u.health for u in self.get_alive_units())
+
+    def clear_dead_units(self) -> None:
+        self.units = [u for u in self.units if u.is_alive]
+
+    def move_squad(self, cost: int = 1) -> bool:
+        alive = self.get_alive_units()
+        if not alive:
+            return False
+
+        if all(u.action_points >= cost for u in alive):
+            for u in alive:
+                u.move(u.x + 1, u.y)
+            return True
+        return False
+
+    def attack_target(self, target: Unit) -> int:
+        total_damage = 0
+        for unit in self.get_alive_units():
+            if unit.action_points >= 2:
+                total_damage += unit.attack(target)
+        return total_damage
+
+    def __str__(self) -> str:
+        alive_count = len(self.get_alive_units())
+        total_count = len(self.units)
+        return f"Загін '{self.name}' [{alive_count}/{total_count} живих | Загальне HP: {self.get_total_health()}] "
+
+    def __len__(self) -> int:
+        return len(self.units)
+
+    def __getitem__(self,index: int) -> Unit:
+        return self.units[index]
+
+
 if __name__ == "__main__":
     warrior = Unit(name="Андрій", health=100, attack_power=20, speed=5, x=0, y=0 )
     enemy = Unit(name="Ворог", health=40, attack_power=10, speed=3, x=1, y=1 )
