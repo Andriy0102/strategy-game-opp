@@ -105,6 +105,13 @@ class Squad:
             return True
         return False
 
+    def attack_target(self, target: Unit) -> int:
+        total_damage = 0
+        for unit in self.get_alive_units():
+            if unit.action_points >= 2:
+                total_damage += unit.attack(target)
+        return total_damage
+
 
 if __name__ == "__main__":
     warrior = Unit(name="Андрій", health=100, attack_power=20, speed=5, x=0, y=0 )
