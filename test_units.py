@@ -42,6 +42,22 @@ class UnitsTest(unittest.TestCase):
         squad.remove_unit(unit1)
         self.assertEqual(len(squad.units), 0)
 
+    def test_squad_health_clear_dead(self):
+        squad = Squad("Бета")
+        unit1 = Unit("Knight", 100, 20, 3, 0, 0)
+        unit2 = Unit("Archer", 30, 15, 4, 1, 1)
+
+        squad.add_unit(unit1)
+        squad.add_unit(unit2)
+
+        self.assertEqual(squad.get_total_health(), 130)
+
+        unit2.take_damage(50)
+        squad.clear_dead_units()
+
+        self.assertEqual(len(squad.units), 1)
+        self.assertEqual(squad.get_total_health(), 100)
+
 
 if __name__ == "__main__":
     unittest.main()
