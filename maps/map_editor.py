@@ -50,8 +50,9 @@ class MapValidator:
 
 
 class MapEditor:
-    def __init__(self, width: int = 10, height: int = 10):
-        self.map = Map(width, height)
+    def __init__(self, width: int = 10, height: int = 10, theme: MapTheme | None = None):
+        self.theme = theme or MapTheme("DefaultTheme")
+        self.map = Map(width, height, default_terrain=self.theme.get_terrain("Ground").name)
 
     def set_tile(self, q: int, r: int, new_tile: Tile) -> bool:
         current_tile = self.map.get_tile((q, r))
@@ -70,5 +71,30 @@ class MapEditor:
         tile.resource = resource
         return True
 
+    def add_lane(self, lane: Lane) -> bool:
+        self.map.add_lane(lane)
+        return True
+
+    def add_base(self, base: Base) -> bool:
+        try:
+            self.map.add_base(base)
+            return True
+        except ValueError:
+            return False
+
+    def add_spawn_point(self, spawn_point: SpawnPoint) -> bool:
+        try:
+            self.map.add_spawn_point(spawn_point)
+            return True
+        except ValueError:
+            return False
+
+    def apply_theme(self, theme: MapTheme) -> MapTheme:
+        self.theme = theme
+        return self.theme
+
     def create_level(self) -> Map:
+        errors = MapValidator.validate(self.map)
+        if errors:
+            raise ValueError(f"Level validation failed:\n" + "\n".join(errors))
         return self.map
