@@ -1,9 +1,17 @@
+from .tiles import Tile, Pickup
+
+
 class Map:
     def __init__(self, width: int, height: int, default_terrain: str = "Ground", default_ispassable: bool = True):
         self._width = width
         self._height = height
         #Basic map generation
         self._grid: list[list[Tile]] = [[Tile(q=q, r=r, terrain_name=default_terrain, is_passable=default_ispassable) for q in range(width)] for r in range(height)]
+
+        #Collections for game architecture
+        self.lanes: list["Lane"] = []
+        self.bases: list["Base"] = []
+        self.spawn_points: list["SpawnPoint"] = []
 
     @property
     def width(self) -> int:
@@ -29,6 +37,15 @@ class Map:
     def can_move_to(self, position:tuple[int, int]) -> bool:
         tile = self.get_tile(position)
         return tile.is_passable if tile else False
+
+    def take_pickup(self, position:tuple[int, int]) -> Pickup | None:
+        tile = self.get_tile(position)
+        if not tile or not tile.pickup:
+            return None
+
+        item = tile.pickup
+        tile.pickup = None
+        return item
 
     #Collect resource
     def harvest_resource(self, position:tuple[int, int], requested_amount: int) -> int:
@@ -58,83 +75,53 @@ class Map:
         neighbors = [(q + dq, r + dr) for dq, dr in vertical + horizontal]
         return [pos for pos in neighbors if self.is_valid_position(pos)]
 
+    def add_lane(self, lane: "Lane"):
+        self.lanes.append(lane)
+
+    def add_base(self, base: "Base"):
+        if len(self.bases) >= 2:
+            raise ValueError("Map can only have 2 bases (Good and Evil)!")
+        self.bases.append(base)
+
+    def get_base_by_team(self, team: str) -> Base | None:
+        for base in self.bases:
+            if base.team == team:
+                return base
+        return None
+
     def __repr__(self):
         return f'Map({self.width}, {self.height})'
 
 
-class Tile:
-    def __init__(self, q: int = 0, r: int = 0, terrain_name: str = "Ground", is_passable: bool = True):
-        self.position = (q, r)
-        self.terrain_name = terrain_name
-        self.is_passable = is_passable
-        self._resource: Resources | None = None # Holds resource object or None
+class Lane:
+    def __init__(self, name: str, has_bridge: bool = False):
+        self.name = name # "Top", "Middle", "Bottom"
+        self.has_bridge = has_bridge
+        self.tiles: list[Tile] = [] #Ordered list of line tiles
 
-    @property
-    def position(self) -> tuple[int, int]:
-        return self._q, self._r
-
-    # Protect coordinates from invalid types or negative indices
-    @position.setter
-    def position(self, coords: tuple[int, int]):
-        if not isinstance(coords, tuple) or len(coords) != 2:
-            raise TypeError("Position must be a tuple of two integers")
-
-        q, r = coords
-        if not isinstance(q, int) or not isinstance(r, int):
-            raise TypeError("Coordinates must be integers")
-        if q < 0 or r < 0:
-            raise ValueError("Coordinates cannot be negative!")
-
-        self._q, self._r = q, r
-
-    @property
-    def q(self) -> int:
-        return self._q
-
-    @property
-    def r(self) -> int:
-        return self._r
-
-    @property
-    def resource(self) -> Resources | None:
-        return self._resource
-
-    @resource.setter
-    def resource(self, value: Resources | None):
-        self._resource = value
+    def add_tile(self, tile: Tile):
+        self.tiles.append(tile)
 
     def __repr__(self):
-        return f'Tile({self.q}, {self.r}) is {self.terrain_name} {"passable" if self.is_passable else "not passable"}, res: {self.resource if self.resource else ""}'
+        return f"Lane({self.name}, bridge={self.has_bridge}, tiles_count={len(self.tiles)})"
 
-
-class Resources:
-    def __init__(self, res_type: str = "Gold", amount: int = 1):
-        self._res_type = res_type
-        self.amount = amount
-
-    @property
-    def res_type(self) -> str:
-        return self._res_type
-
-    @property
-    def amount(self) -> int:
-        return self._amount
-
-    # Prevent economic bugs or negative quantities
-    @amount.setter
-    def amount(self, value: int):
-        if value < 0:
-            raise ValueError("Amount cannot be negative!")
-        self._amount = value
-
-    #Safely deducts resources and returns the amount actually collected
-    def collect(self, requested_amount: int) -> int:
-        if requested_amount <= 0:
-            return 0
-
-        taken_amount = min(self.amount, requested_amount)
-        self.amount -= taken_amount
-        return taken_amount
+class Base:
+    def __init__(self, team: str, spawn_position: tuple[int, int], shop_position: tuple[int, int]):
+        self.team = team
+        self.spawn_position = spawn_position
+        self.shop_position = shop_position
 
     def __repr__(self):
-        return f'Resources({self.res_type}: {self.amount})'
+        return f"Base(team={self.team}, spawn={self.spawn_position}, shop={self.shop_position})"
+
+
+class SpawnPoint:
+    def __init__(self, position: tuple[int, int], item_type: str, chance: float = 1.0, respawn_delay: int = 0, is_fixed: bool = False):
+        self.position = position
+        self.item_type = item_type
+        self.chance = chance
+        self.respawn_delay = respawn_delay
+        self.is_fixed = is_fixed
+
+    def __repr__(self):
+        return f"SpawnPoint(pos={self.position}, type={self.item_type}, fixed={self.is_fixed})"
