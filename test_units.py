@@ -58,6 +58,23 @@ class UnitsTest(unittest.TestCase):
         self.assertEqual(len(squad.units), 1)
         self.assertEqual(squad.get_total_health(), 100)
 
+    def test_squad_methods_and_attack(self):
+        squad = Squad("Альфа")
+        unit1 = Unit("Knight", health=100,attack_power= 20, speed= 3)
+        unit2 = Unit("Archer", health=50,attack_power= 15, speed= 4)
+        target = Unit("Enemy", health=100, attack_power=10, speed=2)
+
+        squad.add_unit(unit1)
+        squad.add_unit(unit2)
+
+        self.assertEqual(len(squad),2)
+        self.assertEqual(squad[0], unit1)
+
+        self.assertIn("Загін 'Альфа'",str(squad))
+
+        squad.attack_target(target)
+        self.assertEqual(target.health, 65)
+
 
 if __name__ == "__main__":
     unittest.main()
