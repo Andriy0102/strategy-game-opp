@@ -112,6 +112,11 @@ class Squad:
                 total_damage += unit.attack(target)
         return total_damage
 
+    def __str__(self) -> str:
+        alive_count = len(self.get_alive_units())
+        total_count = len(self.units)
+        return f"Загін '{self.name}' [{alive_count}/{total_count} живих | Загальне HP: {self.get_total_health()}] "
+
 
 if __name__ == "__main__":
     warrior = Unit(name="Андрій", health=100, attack_power=20, speed=5, x=0, y=0 )
