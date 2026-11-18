@@ -1,9 +1,17 @@
 class Unit:
-    """ Клас Юніт описує юніта для покрокової стратегії.
-    Та також відповідає захарактеристики, переміщення, отримання пошкодження та атаку
-    """
 
-    def __init__(self, name: str, health: int, attack_power: int, speed: int, x: int =0, y: int =0):
+    def __init__(
+            self,
+            name: str,
+            health: int,
+            attack_power: int,
+            speed: int,
+            x: int =0,
+            y: int =0,
+            defense: int = 0,
+            attack_range: int = 1,
+            team: str = "Good"
+    ):
         self.name = name
         self.max_health = health
         self.health = health
@@ -12,9 +20,10 @@ class Unit:
         self.action_points = speed
         self.x = x
         self.y = y
+        self.defense = defense
+        self.attack_range = attack_range
+        self.team = team
         self.is_alive = True
-
-        print(f"[Init] Створення юніта '{self.name}' (HP: {self.health}, atk:{self.attack_power}) y позиції ({self.x}, {self.y})")
 
     def __del__(self):
         print(f"[Del] Об'єкт юніта '{self.name}' знищено з пам'яті")
@@ -23,53 +32,41 @@ class Unit:
         status = "Живий" if self.is_alive else "Знищений"
         return f"Юніт:{self.name} | HP: {self.health}|{self.max_health} | Позиція: ({self.x}, {self.y}) | Стан: {status}"
 
-    def move(self, new_x: int, new_y: int) -> bool:
-        if not self.is_alive:
-            print(f"{self.name} не може преміщатися, оскільки знищений")
-            return False
+    def move(self, new_x: int, new_y: int, move_cost: int = 1) -> bool:
+        if not self.is_alive or move_cost < 0 or self.action_points < move_cost:
+             return False
 
-        cost = 1
-        if self.action_points <cost:
-            print(f"Недостатньо очок для переміщення {self.name}")
-            return False
-
-        self.action_points -= cost
+        self.action_points -= move_cost
         self.x = new_x
         self.y = new_y
-        print(f"{self.name} перемістився у позицію ({self.x}, {self.y}). Залишилося AP: {self.action_points}")
         return True
 
-    def take_damage(self, damage: int):
-        if not self.is_alive:
-            print(f"{self.name} уже знищений і не може отримувати шкоду")
-            return
+    def take_damage(self, damage: int, ignore_defense: bool = False )-> int:
+        if not self.is_alive or damage <= 0:
+            return 0
 
-        self.health -= damage
-        print(f"{self.name} отримав {damage} пошкодження. Залишилося HP {max(0, self.health)}")
+        actual_damage = damage if ignore_defense else max(1, damage - self.defense)
 
+        self.health -= actual_damage
         if self.health <= 0:
-            self.health =0
+            self.health = 0
             self.is_alive = False
-            print(f"Юніт {self.name} був знищений")
+        return actual_damage
 
     def attack(self, target) -> int:
-        if not self.is_alive:
-            print(f"{self.name} не можу атакувати, оскільки знищений")
+        if not self.is_alive or not getattr(target, "is_alive", True):
             return 0
 
         cost = 2
-        if self.action_points <cost:
-            print(f"Недостатньо очок дій для атаки юнітом {self.name}")
+        if self.action_points < cost:
             return 0
 
         self.action_points -= cost
-        print(f"{self.name} атакує {target.name} із силою {self.attack_power} (витрачено {cost} AP)")
-        target.take_damage(self.attack_power)
-        return self.attack_power
+        dealt = target.take_damage(self.attack_power)
+        return dealt if dealt is not None else self.attack_power
 
     def reset_turn(self):
         self.action_points = self.speed
-        print(f"Хід юніта {self.name} оновлено. Очки дій відновлено до {self.action_points}")
 
 class Squad:
 
