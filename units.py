@@ -1,3 +1,6 @@
+import random
+
+
 class Unit:
 
     def __init__(
@@ -272,6 +275,57 @@ class Mage(Unit):
         data = super().to_dict()
         data["max_mana"] = self.max_mana
         data["mana"] = self.mana
+        return data
+
+
+class Scout(Unit):
+
+    def __init__(
+            self,
+            name: str,
+            health: int = 80,
+            attack_power: int = 14,
+            speed: int = 6,
+            x: int = 0,
+            y: int = 0,
+            defense: int = 1,
+            attack_range: int = 1,
+            team: str = "Good",
+            dodge_chance: float = 0.25
+    ):
+        super().__init__(name, health, attack_power, speed, x, y, defense, attack_range, team)
+        self.dodge_chance = dodge_chance
+        self.sprint_used = False
+
+    def take_damage(self, damage: int, ignore_defense: bool = False) -> int:
+        if not self.is_alive or damage <= 0:
+            return 0
+        if random.random() < self.dodge_chance:
+            return 0
+        return super().take_damage(damage, ignore_defense=ignore_defense)
+
+    def move(self, new_x: int, new_y: int, move_cost: int = 1) -> bool:
+        if move_cost > 1:
+            effective_cost = move_cost - 1
+        else:
+            effective_cost = move_cost
+        return super().move(new_x, new_y, effective_cost)
+
+    def special_ability(self, target=None) -> bool:
+        if not self.is_alive or self.sprint_used:
+            return False
+        self.sprint_used = True
+        self.action_points += 2
+        return True
+
+    def reset_turn(self):
+        super().reset_turn()
+        self.sprint_used = False
+
+    def to_dict(self) -> dict:
+        data = super().to_dict()
+        data["dodge_chance"] = self.dodge_chance
+        data["sprint_used"] = self.sprint_used
         return data
 
 
