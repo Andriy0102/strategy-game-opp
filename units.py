@@ -68,6 +68,50 @@ class Unit:
     def reset_turn(self):
         self.action_points = self.speed
 
+    def heal(self, amount: int) -> int:
+        if not self.is_alive or amount <= 0:
+            return 0
+        old_health = self.health
+        self.health += amount
+        if self.health > self.max_health:
+            self.health = self.max_health
+        return self.health - old_health
+
+    def apply_pickup(self, pickup_type: str) -> bool:
+        if not self.is_alive:
+            return False
+        if pickup_type == "Heal":
+            self.heal(30)
+            return True
+        elif pickup_type == "Weapon":
+            self.attack_power += 5
+            return True
+        elif pickup_type == "Ability":
+            self.action_points = self.speed
+            return True
+        return False
+
+    def special_ability(self, target=None) -> bool:
+        return False
+
+    def to_dict(self) -> dict:
+        return {
+            "type": self.__class__.__name__,
+            "name": self.name,
+            "max_health": self.max_health,
+            "health": self.health,
+            "attack_power": self.attack_power,
+            "speed": self.speed,
+            "action_points": self.action_points,
+            "x": self.x,
+            "y": self.y,
+            "defense": self.defense,
+            "attack_range": self.attack_range,
+            "team": self.team,
+            "is_alive": self.is_alive,
+    }
+
+
 class Squad:
 
     def __init__(self, name: str):
