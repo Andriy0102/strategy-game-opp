@@ -173,6 +173,52 @@ class Warrior(Unit):
         return data
 
 
+class Archer(Unit):
+
+    def __init__(
+            self,
+            name: str,
+            health: int = 85,
+            attack_power: int = 18,
+            speed: int = 4,
+            x: int = 0,
+            y: int = 0,
+            defense: int = 1,
+            attack_range: int = 3,
+            team: str = "Good"
+    ):
+        super().__init__(name, health, attack_power, speed, x, y, defense, attack_range, team)
+
+    def attack(self, target) -> int:
+        if not self.is_alive or not target.is_alive:
+            return 0
+        cost = 2
+        if self.action_points < cost:
+            return 0
+
+        self.action_points -= cost
+        distance = abs(self.x - target.x) + abs(self.y - target.y)
+        if distance >= 2:
+            damage = self.attack_power + 5
+        else:
+            damage = self.attack_power
+
+        dealt = target.take_damage(damage, ignore_defense=True)
+        if dealt is None:
+            return damage
+        return dealt
+
+    def special_ability(self, target=None) -> bool:
+        if not self.is_alive or target is None or not target.is_alive:
+            return False
+        if self.action_points < 2:
+            return False
+
+        self.action_points -= 2
+        target.take_damage(self.attack_power + 10, ignore_defense=True)
+        return True
+
+
 class Squad:
 
     def __init__(self, name: str):
