@@ -1,4 +1,5 @@
 import random
+import json
 
 
 class Unit:
@@ -329,6 +330,46 @@ class Scout(Unit):
         return data
 
 
+UNIT_CLASSES = {
+    "Unit": Unit,
+    "Warrior": Warrior,
+    "Archer": Archer,
+    "Mage": Mage,
+    "Scout": Scout,
+}
+
+
+def _unit_from_dict(data: dict) -> Unit:
+    unit_type = data.get("type", "Unit")
+    unit_cls = UNIT_CLASSES.get(unit_type, Unit)
+
+    unit = unit_cls(
+        name=data["name"],
+        health=data["max_health"],
+        attack_power=data["attack_power"],
+        speed=data["speed"],
+        x=data.get("x", 0),
+        y=data.get("y", 0),
+        defense=data.get("defense", 0),
+        attack_range=data.get("attack_range", 1),
+        team=data.get("team", "Good"),
+    )
+    unit.health = data.get("health", unit.max_health)
+    unit.action_points = data.get("action_points", unit.speed)
+    unit.is_alive = data.get("is_alive", unit.health > 0)
+
+    if isinstance(unit, Warrior):
+        unit.rage_active = data.get("rage_active", False)
+    elif isinstance(unit, Mage):
+        unit.max_mana = data.get("max_mana", unit.max_mana)
+        unit.mana = data.get("mana", unit.max_mana)
+    elif isinstance(unit, Scout):
+        unit.dodge_chance = data.get("dodge_chance", 0.25)
+        unit.sprint_used = data.get("sprint_used", False)
+
+    return unit
+
+
 class Squad:
 
     def __init__(self, name: str):
@@ -412,6 +453,25 @@ class Squad:
 
         self.units.sort(key=get_sort_value, reverse=reverse)
         return self.units
+
+    def save_to_file(self, filepath: str) -> None:
+        data = {
+            "squad_name": self.name,
+            "units": [u.to_dict() for u in self.units],
+        }
+        with open(filepath, "w", encoding="utf-8") as file:
+            json.dump(data, file, ensure_ascii=False, indent=4)
+
+    @classmethod
+    def load_from_file(cls, filepath: str) -> "Squad":
+        with open(filepath, "r", encoding="utf-8") as file:
+            data = json.load(file)
+
+        squad = cls(data["squad_name"])
+        for unit_data in data.get("units", []):
+            unit = _unit_from_dict(unit_data)
+            squad.add_unit(unit)
+        return squad
 
 
 if __name__ == "__main__":
