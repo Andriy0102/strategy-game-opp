@@ -112,6 +112,67 @@ class Unit:
     }
 
 
+class Warrior(Unit):
+
+    def __init__(
+            self,
+            name: str,
+            health: int = 120,
+            attack_power: int = 20,
+            speed: int = 3,
+            x: int = 0,
+            y: int = 0,
+            defense: int = 5,
+            attack_range: int = 1,
+            team: str = "Good"
+    ):
+        super().__init__(name, health, attack_power, speed, x, y, defense, attack_range, team)
+        self.rage_active = False
+
+    def take_damage(self, damage: int, ignore_defense: bool = False) -> int:
+        if not self.is_alive or damage <= 0:
+            return 0
+        if ignore_defense:
+            return super().take_damage(damage, ignore_defense=True)
+
+        reduced_damage = damage - (self.defense + 2)
+        if reduced_damage < 1:
+            reduced_damage = 1
+        return super().take_damage(reduced_damage, ignore_defense=True)
+
+    def attack(self, target) -> int:
+        if not self.is_alive or not target.is_alive:
+            return 0
+
+        cost = 2
+        if self.action_points < cost:
+            return 0
+
+        self.action_points -= cost
+        if self.rage_active:
+            damage = int(self.attack_power * 1.5)
+            self.rage_active = False
+        else:
+            damage = self.attack_power
+
+        dealt = target.take_damage(damage)
+        if dealt is None:
+            return damage
+        return dealt
+
+    def special_ability(self, target=None) -> bool:
+        if not self.is_alive or self.action_points < 1 or self.rage_active:
+            return False
+        self.action_points -= 1
+        self.rage_active = True
+        return True
+
+    def to_dict(self) -> dict:
+        data = super().to_dict()
+        data["rage_active"] = self.rage_active
+        return data
+
+
 class Squad:
 
     def __init__(self, name: str):
