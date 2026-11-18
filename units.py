@@ -219,6 +219,62 @@ class Archer(Unit):
         return True
 
 
+class Mage(Unit):
+
+    def __init__(
+            self,
+            name: str,
+            health: int = 70,
+            attack_power: int = 22,
+            speed: int = 3,
+            x: int = 0,
+            y: int = 0,
+            defense: int = 0,
+            attack_range: int = 2,
+            team: str = "Good",
+            mana: int = 40
+    ):
+        super().__init__(name, health, attack_power, speed, x, y, defense, attack_range, team)
+        self.max_mana = mana
+        self.mana = mana
+
+    def attack(self, target) -> int:
+        if not self.is_alive or not target.is_alive:
+            return 0
+        cost = 2
+        if self.action_points < cost:
+            return 0
+
+        self.action_points -= cost
+        dealt = target.take_damage(self.attack_power, ignore_defense=True)
+        if dealt is None:
+            return self.attack_power
+        return dealt
+
+    def special_ability(self, target=None) -> bool:
+        if not self.is_alive or target is None or not target.is_alive:
+            return False
+        if self.action_points < 2 or self.mana < 20:
+            return False
+
+        self.action_points -= 2
+        self.mana -= 20
+        target.heal(25)
+        return True
+
+    def reset_turn(self):
+        super().reset_turn()
+        self.mana += 10
+        if self.mana > self.max_mana:
+            self.mana = self.max_mana
+
+    def to_dict(self) -> dict:
+        data = super().to_dict()
+        data["max_mana"] = self.max_mana
+        data["mana"] = self.mana
+        return data
+
+
 class Squad:
 
     def __init__(self, name: str):
