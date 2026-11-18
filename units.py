@@ -381,6 +381,38 @@ class Squad:
     def __getitem__(self,index: int) -> Unit:
         return self.units[index]
 
+    def find_by_name(self, name: str) -> Unit | None:
+        target_name = name.strip().lower()
+        for unit in self.units:
+            if unit.name.lower() == target_name:
+                return unit
+        return None
+
+    def filter_by_type(self, unit_type: type) -> list[Unit]:
+        return [u for u in self.units if isinstance(u, unit_type)]
+
+    def filter_by_health(self, min_health: int) -> list[Unit]:
+        return [u for u in self.units if u.health >= min_health]
+
+    def sort_units(self, by: str = "health", reverse: bool = True) -> list[Unit]:
+        allowed_fields = ["health", "attack_power", "speed", "defense", "name"]
+        if by not in allowed_fields:
+            raise ValueError(f"Непідтримуване поле сортування: {by}")
+
+        def get_sort_value(unit: Unit):
+            if by == "health":
+                return unit.health
+            elif by == "attack_power":
+                return unit.attack_power
+            elif by == "speed":
+                return unit.speed
+            elif by == "defense":
+                return unit.defense
+            return unit.name
+
+        self.units.sort(key=get_sort_value, reverse=reverse)
+        return self.units
+
 
 if __name__ == "__main__":
     warrior = Unit(name="Андрій", health=100, attack_power=20, speed=5, x=0, y=0 )
