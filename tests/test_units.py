@@ -103,6 +103,39 @@ class TestUnitClasses(unittest.TestCase):
         self.assertTrue(archer.special_ability(tank))
         self.assertEqual(tank.health, 69)
 
+    def test_mage_attack_and_healing(self):
+        mage = Mage("Максим", attack_power=22, mana=40)
+        ally = Warrior("Союзник", health=120, defense=5)
+        ally.take_damage(50, ignore_defense=True)
+
+        self.assertTrue(mage.special_ability(ally))
+        self.assertEqual(ally.health, 95)
+        self.assertEqual(mage.mana, 20)
+
+        mage.reset_turn()
+        self.assertEqual(mage.mana, 30)
+
+        dealt = mage.attack(ally)
+        self.assertEqual(dealt, 22)
+        self.assertEqual(ally.health, 73)
+
+    def test_scout_dodge_and_sprint(self):
+        dodger = Scout("Ігор", health=80, speed=6, dodge_chance=1.0)
+        target = Scout("Суперник", health=80, speed=6, dodge_chance=0.0)
+
+        self.assertEqual(dodger.take_damage(30), 0)
+        self.assertEqual(dodger.health, 80)
+
+        self.assertEqual(target.take_damage(30), 29)
+        self.assertEqual(target.health, 51)
+
+        self.assertTrue(dodger.move(1, 0, move_cost=3))
+        self.assertEqual(dodger.action_points, 4)
+
+        self.assertTrue(dodger.special_ability())
+        self.assertEqual(dodger.action_points, 6)
+        self.assertFalse(dodger.special_ability())
+
 
 if __name__ == "__main__":
     unittest.main()
