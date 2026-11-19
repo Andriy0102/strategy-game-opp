@@ -152,6 +152,45 @@ class TestUnitClasses(unittest.TestCase):
         self.assertFalse(unit.apply_pickup("Unknown"))
 
 
+class TestSquadFeatures(unittest.TestCase):
+
+    def setUp(self):
+        self.squad = Squad("Авангард")
+        self.warrior = Warrior("Тарас", health=120, attack_power=20, speed=3)
+        self.archer = Archer("Олег", health=85, attack_power=18, speed=4)
+        self.mage = Mage("Максим", health=70, attack_power=22, speed=3, mana=40)
+        self.scout = Scout("Ігор", health=80, attack_power=14, speed=6, dodge_chance=0.5)
+        self.squad.add_unit(self.warrior)
+        self.squad.add_unit(self.archer)
+        self.squad.add_unit(self.mage)
+        self.squad.add_unit(self.scout)
+
+    def test_search_and_filter(self):
+        found = self.squad.find_by_name("олег")
+        self.assertIs(found, self.archer)
+        self.assertIsNone(self.squad.find_by_name("Невідомий"))
+
+        archers = self.squad.filter_by_type(Archer)
+        self.assertEqual(archers, [self.archer])
+
+        healthy = self.squad.filter_by_health(85)
+        self.assertEqual(len(healthy), 2)
+        self.assertIn(self.warrior, healthy)
+        self.assertIn(self.archer, healthy)
+
+    def test_sort_units(self):
+        sorted_by_speed = self.squad.sort_units(by="speed", reverse=True)
+        self.assertEqual(sorted_by_speed[0], self.scout)
+        self.assertEqual(sorted_by_speed[1], self.archer)
+
+        sorted_by_hp_asc = self.squad.sort_units(by="health", reverse=False)
+        self.assertEqual(sorted_by_hp_asc[0], self.mage)
+        self.assertEqual(sorted_by_hp_asc[-1], self.warrior)
+
+        with self.assertRaises(ValueError):
+            self.squad.sort_units(by="invalid_field")
+
+
 if __name__ == "__main__":
     unittest.main()
 
