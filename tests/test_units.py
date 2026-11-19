@@ -136,6 +136,21 @@ class TestUnitClasses(unittest.TestCase):
         self.assertEqual(dodger.action_points, 6)
         self.assertFalse(dodger.special_ability())
 
+    def test_apply_pickups(self):
+        unit = Warrior("Тарас", health=100, attack_power=15, speed=4)
+        unit.take_damage(50, ignore_defense=True)
+
+        self.assertTrue(unit.apply_pickup("Heal"))
+        self.assertEqual(unit.health, 80)
+
+        self.assertTrue(unit.apply_pickup("Weapon"))
+        self.assertEqual(unit.attack_power, 20)
+
+        unit.move(1, 0)
+        self.assertTrue(unit.apply_pickup("Ability"))
+        self.assertEqual(unit.action_points, 4)
+        self.assertFalse(unit.apply_pickup("Unknown"))
+
 
 if __name__ == "__main__":
     unittest.main()
