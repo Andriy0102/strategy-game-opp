@@ -1,3 +1,5 @@
+from typing import Any
+
 from .resources import Resources
 
 
@@ -85,6 +87,28 @@ class Tile:
     @resource.setter
     def resource(self, value: Resources | None):
         self._resource = value
+
+    def to_dict(self) -> dict:
+        return {
+            "q": self.q,
+            "r": self.r,
+            "terrain_name": self.terrain_name,
+            "is_passable": self.is_passable,
+            "resource": self._resource.to_dict() if self._resource else None
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> Tile:
+        tile = cls(
+            q=data["q"],
+            r=data["r"],
+            terrain_name=data["terrain_name"],
+            is_passable=data["is_passable"],
+        )
+
+        if data.get("resource"):
+            tile.resource = Resources.from_dict(data["resource"])
+        return tile
 
     def __repr__(self):
         return f'Tile({self.q}, {self.r}) is {self.terrain_name} {"passable" if self.is_passable else "not passable"}, res: {self.resource if self.resource else ""}'

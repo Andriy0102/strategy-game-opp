@@ -92,6 +92,39 @@ class Map:
                 return base
         return None
 
+    def to_dict(self) -> dict:
+        tiles_list = []
+        for r in range(self.height):
+            for q in range(self.width):
+                tile = self.get_tile((q, r))
+                if tile:
+                    tiles_list.append(tile.to_dict())
+
+        return {
+            "width": self.width,
+            "height": self.height,
+            "tiles": tiles_list,
+            "bases": [base.to_dict() for base in self.bases],
+            "spawn_points": [sp.to_dict() for sp in self.spawn_points],
+            "lanes": [{"name": lane.name, "tiles": [list(t.position) for t in lane.tiles]} for lane in self.lanes]
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Map":
+        game_map = cls(width=data["width"], height=data["height"])
+
+        for tile_data in data["tiles"]:
+            tile = Tile.from_dict(tile_data)
+            game_map._grid[tile.r][tile.q] = tile
+
+        for base_data in data["bases"]:
+            game_map.add_base(Base.from_dict(base_data))
+
+        for sp_data in data["spawn_points"]:
+            game_map.add_spawn_point(SpawnPoint.from_dict(sp_data))
+
+        return game_map
+
     def __repr__(self):
         return f'Map({self.width}, {self.height})'
 
@@ -114,6 +147,21 @@ class Base:
         self.spawn_position = spawn_position
         self.shop_position = shop_position
 
+    def to_dict(self) -> dict:
+        return {
+            "team": self.team,
+            "spawn_position": list(self.spawn_position),
+            "shop_position": list(self.shop_position)
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Base":
+        return cls(
+            team=data["team"],
+            spawn_position=tuple(data["spawn_position"]),
+            shop_position=tuple(data["shop_position"])
+        )
+
     def __repr__(self):
         return f"Base(team={self.team}, spawn={self.spawn_position}, shop={self.shop_position})"
 
@@ -125,6 +173,15 @@ class SpawnPoint:
         self.chance = chance
         self.respawn_delay = respawn_delay
         self.is_fixed = is_fixed
+
+    def to_dict(self) -> dict:
+        return {
+            "position": self.position
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "SpawnPoint":
+        return cls(position=tuple(data["position"]))
 
     def __repr__(self):
         return f"SpawnPoint(pos={self.position}, type={self.item_type}, fixed={self.is_fixed})"

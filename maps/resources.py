@@ -27,5 +27,16 @@ class Resources:
         self.amount -= taken_amount
         return taken_amount
 
+
+    def to_dict(self) -> dict:
+        return {
+            "res_type": self._res_type,
+            "amount": self.amount
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> Resources:
+        return cls(res_type=data["res_type"], amount=data["amount"])
+
     def __repr__(self):
         return f'Resources({self.res_type}: {self.amount})'
