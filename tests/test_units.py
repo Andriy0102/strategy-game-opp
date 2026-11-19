@@ -1,5 +1,7 @@
 import unittest
 from units import Unit, Squad, Warrior, Archer, Mage, Scout
+import os
+import tempfile
 
 
 class UnitsTest(unittest.TestCase):
@@ -189,6 +191,31 @@ class TestSquadFeatures(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             self.squad.sort_units(by="invalid_field")
+
+    def test_json_save_and_load(self):
+        self.warrior.special_ability()
+        self.mage.special_ability(self.warrior)
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as tmp:
+            temp_path = tmp.name
+
+        try:
+            self.squad.save_to_file(temp_path)
+            loaded_squad = Squad.load_from_file(temp_path)
+
+            self.assertEqual(loaded_squad.name, "Авангард")
+            self.assertEqual(len(loaded_squad), 4)
+            self.assertIsInstance(loaded_squad[0], Warrior)
+            self.assertIsInstance(loaded_squad[1], Archer)
+            self.assertIsInstance(loaded_squad[2], Mage)
+            self.assertIsInstance(loaded_squad[3], Scout)
+
+            self.assertTrue(loaded_squad[0].rage_active)
+            self.assertEqual(loaded_squad[2].mana, 20)
+            self.assertEqual(loaded_squad[3].dodge_chance, 0.5)
+        finally:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
 
 
 if __name__ == "__main__":
