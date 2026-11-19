@@ -1,9 +1,21 @@
-class Unit:
-    """ Клас Юніт описує юніта для покрокової стратегії.
-    Та також відповідає захарактеристики, переміщення, отримання пошкодження та атаку
-    """
+import random
+import json
 
-    def __init__(self, name: str, health: int, attack_power: int, speed: int, x: int =0, y: int =0):
+
+class Unit:
+
+    def __init__(
+            self,
+            name: str,
+            health: int,
+            attack_power: int,
+            speed: int,
+            x: int =0,
+            y: int =0,
+            defense: int = 0,
+            attack_range: int = 1,
+            team: str = "Good"
+    ):
         self.name = name
         self.max_health = health
         self.health = health
@@ -12,9 +24,10 @@ class Unit:
         self.action_points = speed
         self.x = x
         self.y = y
+        self.defense = defense
+        self.attack_range = attack_range
+        self.team = team
         self.is_alive = True
-
-        print(f"[Init] Створення юніта '{self.name}' (HP: {self.health}, atk:{self.attack_power}) y позиції ({self.x}, {self.y})")
 
     def __del__(self):
         print(f"[Del] Об'єкт юніта '{self.name}' знищено з пам'яті")
@@ -23,53 +36,339 @@ class Unit:
         status = "Живий" if self.is_alive else "Знищений"
         return f"Юніт:{self.name} | HP: {self.health}|{self.max_health} | Позиція: ({self.x}, {self.y}) | Стан: {status}"
 
-    def move(self, new_x: int, new_y: int) -> bool:
-        if not self.is_alive:
-            print(f"{self.name} не може преміщатися, оскільки знищений")
-            return False
+    def move(self, new_x: int, new_y: int, move_cost: int = 1) -> bool:
+        if not self.is_alive or move_cost < 0 or self.action_points < move_cost:
+             return False
 
-        cost = 1
-        if self.action_points <cost:
-            print(f"Недостатньо очок для переміщення {self.name}")
-            return False
-
-        self.action_points -= cost
+        self.action_points -= move_cost
         self.x = new_x
         self.y = new_y
-        print(f"{self.name} перемістився у позицію ({self.x}, {self.y}). Залишилося AP: {self.action_points}")
         return True
 
-    def take_damage(self, damage: int):
-        if not self.is_alive:
-            print(f"{self.name} уже знищений і не може отримувати шкоду")
-            return
+    def take_damage(self, damage: int, ignore_defense: bool = False )-> int:
+        if not self.is_alive or damage <= 0:
+            return 0
 
-        self.health -= damage
-        print(f"{self.name} отримав {damage} пошкодження. Залишилося HP {max(0, self.health)}")
+        actual_damage = damage if ignore_defense else max(1, damage - self.defense)
 
+        self.health -= actual_damage
         if self.health <= 0:
-            self.health =0
+            self.health = 0
             self.is_alive = False
-            print(f"Юніт {self.name} був знищений")
+        return actual_damage
 
     def attack(self, target) -> int:
-        if not self.is_alive:
-            print(f"{self.name} не можу атакувати, оскільки знищений")
+        if not self.is_alive or not getattr(target, "is_alive", True):
             return 0
 
         cost = 2
-        if self.action_points <cost:
-            print(f"Недостатньо очок дій для атаки юнітом {self.name}")
+        if self.action_points < cost:
             return 0
 
         self.action_points -= cost
-        print(f"{self.name} атакує {target.name} із силою {self.attack_power} (витрачено {cost} AP)")
-        target.take_damage(self.attack_power)
-        return self.attack_power
+        dealt = target.take_damage(self.attack_power)
+        return dealt if dealt is not None else self.attack_power
 
     def reset_turn(self):
         self.action_points = self.speed
-        print(f"Хід юніта {self.name} оновлено. Очки дій відновлено до {self.action_points}")
+
+    def heal(self, amount: int) -> int:
+        if not self.is_alive or amount <= 0:
+            return 0
+        old_health = self.health
+        self.health += amount
+        if self.health > self.max_health:
+            self.health = self.max_health
+        return self.health - old_health
+
+    def apply_pickup(self, pickup_type: str) -> bool:
+        if not self.is_alive:
+            return False
+        if pickup_type == "Heal":
+            self.heal(30)
+            return True
+        elif pickup_type == "Weapon":
+            self.attack_power += 5
+            return True
+        elif pickup_type == "Ability":
+            self.action_points = self.speed
+            return True
+        return False
+
+    def special_ability(self, target=None) -> bool:
+        return False
+
+    def to_dict(self) -> dict:
+        return {
+            "type": self.__class__.__name__,
+            "name": self.name,
+            "max_health": self.max_health,
+            "health": self.health,
+            "attack_power": self.attack_power,
+            "speed": self.speed,
+            "action_points": self.action_points,
+            "x": self.x,
+            "y": self.y,
+            "defense": self.defense,
+            "attack_range": self.attack_range,
+            "team": self.team,
+            "is_alive": self.is_alive,
+    }
+
+
+class Warrior(Unit):
+
+    def __init__(
+            self,
+            name: str,
+            health: int = 120,
+            attack_power: int = 20,
+            speed: int = 3,
+            x: int = 0,
+            y: int = 0,
+            defense: int = 5,
+            attack_range: int = 1,
+            team: str = "Good"
+    ):
+        super().__init__(name, health, attack_power, speed, x, y, defense, attack_range, team)
+        self.rage_active = False
+
+    def take_damage(self, damage: int, ignore_defense: bool = False) -> int:
+        if not self.is_alive or damage <= 0:
+            return 0
+        if ignore_defense:
+            return super().take_damage(damage, ignore_defense=True)
+
+        reduced_damage = damage - (self.defense + 2)
+        if reduced_damage < 1:
+            reduced_damage = 1
+        return super().take_damage(reduced_damage, ignore_defense=True)
+
+    def attack(self, target) -> int:
+        if not self.is_alive or not target.is_alive:
+            return 0
+
+        cost = 2
+        if self.action_points < cost:
+            return 0
+
+        self.action_points -= cost
+        if self.rage_active:
+            damage = int(self.attack_power * 1.5)
+            self.rage_active = False
+        else:
+            damage = self.attack_power
+
+        dealt = target.take_damage(damage)
+        if dealt is None:
+            return damage
+        return dealt
+
+    def special_ability(self, target=None) -> bool:
+        if not self.is_alive or self.action_points < 1 or self.rage_active:
+            return False
+        self.action_points -= 1
+        self.rage_active = True
+        return True
+
+    def to_dict(self) -> dict:
+        data = super().to_dict()
+        data["rage_active"] = self.rage_active
+        return data
+
+
+class Archer(Unit):
+
+    def __init__(
+            self,
+            name: str,
+            health: int = 85,
+            attack_power: int = 18,
+            speed: int = 4,
+            x: int = 0,
+            y: int = 0,
+            defense: int = 1,
+            attack_range: int = 3,
+            team: str = "Good"
+    ):
+        super().__init__(name, health, attack_power, speed, x, y, defense, attack_range, team)
+
+    def attack(self, target) -> int:
+        if not self.is_alive or not target.is_alive:
+            return 0
+        cost = 2
+        if self.action_points < cost:
+            return 0
+
+        self.action_points -= cost
+        distance = abs(self.x - target.x) + abs(self.y - target.y)
+        if distance >= 2:
+            damage = self.attack_power + 5
+        else:
+            damage = self.attack_power
+
+        dealt = target.take_damage(damage, ignore_defense=True)
+        if dealt is None:
+            return damage
+        return dealt
+
+    def special_ability(self, target=None) -> bool:
+        if not self.is_alive or target is None or not target.is_alive:
+            return False
+        if self.action_points < 2:
+            return False
+
+        self.action_points -= 2
+        target.take_damage(self.attack_power + 10, ignore_defense=True)
+        return True
+
+
+class Mage(Unit):
+
+    def __init__(
+            self,
+            name: str,
+            health: int = 70,
+            attack_power: int = 22,
+            speed: int = 3,
+            x: int = 0,
+            y: int = 0,
+            defense: int = 0,
+            attack_range: int = 2,
+            team: str = "Good",
+            mana: int = 40
+    ):
+        super().__init__(name, health, attack_power, speed, x, y, defense, attack_range, team)
+        self.max_mana = mana
+        self.mana = mana
+
+    def attack(self, target) -> int:
+        if not self.is_alive or not target.is_alive:
+            return 0
+        cost = 2
+        if self.action_points < cost:
+            return 0
+
+        self.action_points -= cost
+        dealt = target.take_damage(self.attack_power, ignore_defense=True)
+        if dealt is None:
+            return self.attack_power
+        return dealt
+
+    def special_ability(self, target=None) -> bool:
+        if not self.is_alive or target is None or not target.is_alive:
+            return False
+        if self.action_points < 2 or self.mana < 20:
+            return False
+
+        self.action_points -= 2
+        self.mana -= 20
+        target.heal(25)
+        return True
+
+    def reset_turn(self):
+        super().reset_turn()
+        self.mana += 10
+        if self.mana > self.max_mana:
+            self.mana = self.max_mana
+
+    def to_dict(self) -> dict:
+        data = super().to_dict()
+        data["max_mana"] = self.max_mana
+        data["mana"] = self.mana
+        return data
+
+
+class Scout(Unit):
+
+    def __init__(
+            self,
+            name: str,
+            health: int = 80,
+            attack_power: int = 14,
+            speed: int = 6,
+            x: int = 0,
+            y: int = 0,
+            defense: int = 1,
+            attack_range: int = 1,
+            team: str = "Good",
+            dodge_chance: float = 0.25
+    ):
+        super().__init__(name, health, attack_power, speed, x, y, defense, attack_range, team)
+        self.dodge_chance = dodge_chance
+        self.sprint_used = False
+
+    def take_damage(self, damage: int, ignore_defense: bool = False) -> int:
+        if not self.is_alive or damage <= 0:
+            return 0
+        if random.random() < self.dodge_chance:
+            return 0
+        return super().take_damage(damage, ignore_defense=ignore_defense)
+
+    def move(self, new_x: int, new_y: int, move_cost: int = 1) -> bool:
+        if move_cost > 1:
+            effective_cost = move_cost - 1
+        else:
+            effective_cost = move_cost
+        return super().move(new_x, new_y, effective_cost)
+
+    def special_ability(self, target=None) -> bool:
+        if not self.is_alive or self.sprint_used:
+            return False
+        self.sprint_used = True
+        self.action_points += 2
+        return True
+
+    def reset_turn(self):
+        super().reset_turn()
+        self.sprint_used = False
+
+    def to_dict(self) -> dict:
+        data = super().to_dict()
+        data["dodge_chance"] = self.dodge_chance
+        data["sprint_used"] = self.sprint_used
+        return data
+
+
+UNIT_CLASSES = {
+    "Unit": Unit,
+    "Warrior": Warrior,
+    "Archer": Archer,
+    "Mage": Mage,
+    "Scout": Scout,
+}
+
+
+def _unit_from_dict(data: dict) -> Unit:
+    unit_type = data.get("type", "Unit")
+    unit_cls = UNIT_CLASSES.get(unit_type, Unit)
+
+    unit = unit_cls(
+        name=data["name"],
+        health=data["max_health"],
+        attack_power=data["attack_power"],
+        speed=data["speed"],
+        x=data.get("x", 0),
+        y=data.get("y", 0),
+        defense=data.get("defense", 0),
+        attack_range=data.get("attack_range", 1),
+        team=data.get("team", "Good"),
+    )
+    unit.health = data.get("health", unit.max_health)
+    unit.action_points = data.get("action_points", unit.speed)
+    unit.is_alive = data.get("is_alive", unit.health > 0)
+
+    if isinstance(unit, Warrior):
+        unit.rage_active = data.get("rage_active", False)
+    elif isinstance(unit, Mage):
+        unit.max_mana = data.get("max_mana", unit.max_mana)
+        unit.mana = data.get("mana", unit.max_mana)
+    elif isinstance(unit, Scout):
+        unit.dodge_chance = data.get("dodge_chance", 0.25)
+        unit.sprint_used = data.get("sprint_used", False)
+
+    return unit
+
 
 class Squad:
 
@@ -122,6 +421,57 @@ class Squad:
 
     def __getitem__(self,index: int) -> Unit:
         return self.units[index]
+
+    def find_by_name(self, name: str) -> Unit | None:
+        target_name = name.strip().lower()
+        for unit in self.units:
+            if unit.name.lower() == target_name:
+                return unit
+        return None
+
+    def filter_by_type(self, unit_type: type) -> list[Unit]:
+        return [u for u in self.units if isinstance(u, unit_type)]
+
+    def filter_by_health(self, min_health: int) -> list[Unit]:
+        return [u for u in self.units if u.health >= min_health]
+
+    def sort_units(self, by: str = "health", reverse: bool = True) -> list[Unit]:
+        allowed_fields = ["health", "attack_power", "speed", "defense", "name"]
+        if by not in allowed_fields:
+            raise ValueError(f"Непідтримуване поле сортування: {by}")
+
+        def get_sort_value(unit: Unit):
+            if by == "health":
+                return unit.health
+            elif by == "attack_power":
+                return unit.attack_power
+            elif by == "speed":
+                return unit.speed
+            elif by == "defense":
+                return unit.defense
+            return unit.name
+
+        self.units.sort(key=get_sort_value, reverse=reverse)
+        return self.units
+
+    def save_to_file(self, filepath: str) -> None:
+        data = {
+            "squad_name": self.name,
+            "units": [u.to_dict() for u in self.units],
+        }
+        with open(filepath, "w", encoding="utf-8") as file:
+            json.dump(data, file, ensure_ascii=False, indent=4)
+
+    @classmethod
+    def load_from_file(cls, filepath: str) -> "Squad":
+        with open(filepath, "r", encoding="utf-8") as file:
+            data = json.load(file)
+
+        squad = cls(data["squad_name"])
+        for unit_data in data.get("units", []):
+            unit = _unit_from_dict(unit_data)
+            squad.add_unit(unit)
+        return squad
 
 
 if __name__ == "__main__":
