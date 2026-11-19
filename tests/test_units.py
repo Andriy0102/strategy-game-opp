@@ -1,5 +1,6 @@
 import unittest
-from units import Unit, Squad
+from units import Unit, Squad, Warrior, Archer, Mage, Scout
+
 
 class UnitsTest(unittest.TestCase):
     def setUp(self):
@@ -74,6 +75,33 @@ class UnitsTest(unittest.TestCase):
 
         squad.attack_target(target)
         self.assertEqual(target.health, 65)
+
+
+class TestUnitClasses(unittest.TestCase):
+
+    def test_warrior_defense_and_rage(self):
+        warrior = Warrior("Тарас", health=120, attack_power=20, defense=5)
+        enemy = Unit("Ворог1", health=100, attack_power=15, speed=3, defense=2)
+
+        dealt_to_warrior = warrior.take_damage(15)
+        self.assertEqual(dealt_to_warrior, 8)
+        self.assertEqual(warrior.health, 112)
+
+        self.assertTrue(warrior.special_ability())
+        dealt_by_warrior = warrior.attack(enemy)
+        self.assertEqual(dealt_by_warrior, 28)
+        self.assertEqual(enemy.health, 72)
+
+    def test_archer_distance_and_ability(self):
+        archer = Archer("Олег", attack_power=18, x=0, y=0)
+        tank = Warrior("Ворог2", health=120, defense=10, x=2, y=1)
+
+        dealt = archer.attack(tank)
+        self.assertEqual(dealt, 23)
+        self.assertEqual(tank.health, 97)
+
+        self.assertTrue(archer.special_ability(tank))
+        self.assertEqual(tank.health, 69)
 
 
 if __name__ == "__main__":
