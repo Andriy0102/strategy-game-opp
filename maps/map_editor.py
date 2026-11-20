@@ -1,6 +1,5 @@
 from .map import Map, Lane, Base, SpawnPoint
-from .tiles import Tile, TerrainLibrary, Terrain
-from .resources import Resources
+from .tiles import Tile, TerrainLibrary, Terrain, Pickup
 
 
 class MapTheme:
@@ -18,33 +17,46 @@ class MapTheme:
 
 class MapValidator:
     @staticmethod
-    def validate(map_obj: Map) -> list[str]:
-
+    def validate(game_map: Map) -> list[str]:
         errors = []
-        if not MapValidator.check_bases(map_obj):
-            errors.append("Invalid bases: Map must contain exactly 2 bases ('Good' and 'Evil').")
-        if not MapValidator.check_lanes(map_obj):
-            errors.append("Invalid lanes: Map must contain at least one defined path/lane.")
-        if not MapValidator.check_spawn_points(map_obj):
-            errors.append("Invalid spawn points: Some spawn points are out of bounds or on impassable terrain.")
+        if not MapValidator.check_bases(game_map):
+            errors.append("Invalid bases: Map must contain 2 valid bases ('Good' and 'Evil') with distinct spawn and shop positions.")
+        if not MapValidator.check_lanes(game_map):
+            errors.append("Invalid lanes: Map must contain at least one connected path/lane.")
+        if not MapValidator.check_spawn_points(game_map):
+            errors.append("Invalid spawn points: Some spawn points are out of bounds or on non-enterable terrain.")
         return errors
 
     @staticmethod
-    def check_bases(map_obj: Map) -> bool:
-        teams = [base.team for base in map_obj.bases]
-        return len(map_obj.bases) == 2 and "Good" in teams and "Evil" in teams
-
-    @staticmethod
-    def check_lanes(map_obj: Map) -> bool:
-        return len(map_obj.lanes) > 0
-
-    @staticmethod
-    def check_spawn_points(map_obj: Map) -> bool:
-        for sp in map_obj.spawn_points:
-            if not map_obj.is_valid_position(sp.position):
+    def check_bases(game_map: Map) -> bool:
+        teams = [base.team for base in game_map.bases]
+        if len(game_map.bases) != 2 or "Good" not in teams or "Evil" not in teams:
+            return False
+        for base in game_map.bases:
+            if base.spawn_position == base.shop_position:
                 return False
-            tile = map_obj.get_tile(sp.position)
-            if tile and not tile.is_passable:
+            if not base.is_valid_on_map(game_map):
+                return False
+        return True
+
+    @staticmethod
+    def check_lanes(game_map: Map) -> bool:
+        if len(game_map.lanes) == 0:
+            return False
+        for lane in game_map.lanes:
+            if not lane.tiles or not lane.is_connected(game_map):
+                return False
+            if any(not tile.can_enter() for tile in lane.tiles):
+                return False
+        return True
+
+    @staticmethod
+    def check_spawn_points(game_map: Map) -> bool:
+        for spawn_point in game_map.spawn_points:
+            if not game_map.is_valid_position(spawn_point.position):
+                return False
+            tile = game_map.get_tile(spawn_point.position)
+            if tile is None or not tile.can_enter():
                 return False
         return True
 
@@ -61,14 +73,15 @@ class MapEditor:
 
         current_tile.terrain_name = new_tile.terrain_name
         current_tile.is_passable = new_tile.is_passable
+        current_tile.pickup = new_tile.pickup
         return True
 
-    def set_resource(self, q: int, r: int, resource: Resources) -> bool:
+    def set_pickup(self, q: int, r: int, pickup: Pickup | None) -> bool:
         tile = self.map.get_tile((q, r))
-        if tile is None or not tile.is_passable:
+        if tile is None or not tile.can_enter():
             return False
 
-        tile.resource = resource
+        tile.pickup = pickup
         return True
 
     def add_lane(self, lane: Lane) -> bool:
@@ -89,12 +102,24 @@ class MapEditor:
         except ValueError:
             return False
 
-    def apply_theme(self, theme: MapTheme) -> MapTheme:
+    def apply_theme(self, theme: MapTheme, replace_ground_only: bool = True) -> MapTheme:
+        previous_ground_name = self.theme.get_terrain("Ground").name
+        new_ground = theme.get_terrain("Ground")
         self.theme = theme
+
+        for r in range(self.map.height):
+            for q in range(self.map.width):
+                tile = self.map.get_tile((q, r))
+                if tile is None:
+                    continue
+                if not replace_ground_only or tile.terrain_name == previous_ground_name:
+                    tile.terrain_name = new_ground.name
+                    tile.is_passable = new_ground.is_passable
+
         return self.theme
 
     def create_level(self) -> Map:
         errors = MapValidator.validate(self.map)
         if errors:
-            raise ValueError(f"Level validation failed:\n" + "\n".join(errors))
+            raise ValueError("Level validation failed:\n" + "\n".join(errors))
         return self.map
