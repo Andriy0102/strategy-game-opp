@@ -1,7 +1,5 @@
-from .map import Map, Base, SpawnPoint, Lane
-from .tiles import Tile
-from .resources import Resources
 import json
+from .map import Map
 
 
 class Storage:
