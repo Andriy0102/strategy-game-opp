@@ -1,0 +1,428 @@
+{
+    "width": 5,
+    "height": 5,
+    "tiles": [
+        {
+            "q": 0,
+            "r": 0,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 1,
+            "r": 0,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 2,
+            "r": 0,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 3,
+            "r": 0,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 4,
+            "r": 0,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 0,
+            "r": 1,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 1,
+            "r": 1,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 2,
+            "r": 1,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": {
+                "type": "HealPickup",
+                "name": "Potion",
+                "value": 50,
+                "heal": 35
+            }
+        },
+        {
+            "q": 3,
+            "r": 1,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": {
+                "type": "ItemPickup",
+                "name": "Speed Scroll",
+                "value": 75,
+                "bonus": 1
+            }
+        },
+        {
+            "q": 4,
+            "r": 1,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 0,
+            "r": 2,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 1,
+            "r": 2,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": {
+                "type": "WeaponPickup",
+                "name": "Blade",
+                "value": 100,
+                "bonus": 12
+            }
+        },
+        {
+            "q": 2,
+            "r": 2,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": {
+                "type": "GoldPickup",
+                "name": "Gold",
+                "value": 150
+            }
+        },
+        {
+            "q": 3,
+            "r": 2,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 4,
+            "r": 2,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 0,
+            "r": 3,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 1,
+            "r": 3,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 2,
+            "r": 3,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 3,
+            "r": 3,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 4,
+            "r": 3,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 0,
+            "r": 4,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 1,
+            "r": 4,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 2,
+            "r": 4,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 3,
+            "r": 4,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        },
+        {
+            "q": 4,
+            "r": 4,
+            "terrain_name": "Ground",
+            "terrain": {
+                "type": "Ground",
+                "is_passable": true,
+                "move_cost": 1
+            },
+            "is_passable": true,
+            "pickup": null
+        }
+    ],
+    "bases": [
+        {
+            "team": "Good",
+            "spawn_position": [
+                0,
+                0
+            ],
+            "shop_position": [
+                0,
+                1
+            ],
+            "shop": {
+                "catalog": [
+                    {
+                        "item": {
+                            "type": "WeaponPickup",
+                            "name": "Weapon",
+                            "value": 100,
+                            "bonus": 10
+                        },
+                        "price": 100
+                    },
+                    {
+                        "item": {
+                            "type": "HealPickup",
+                            "name": "Heal",
+                            "value": 50,
+                            "heal": 10
+                        },
+                        "price": 50
+                    },
+                    {
+                        "item": {
+                            "type": "ItemPickup",
+                            "name": "Speed Scroll",
+                            "value": 75,
+                            "bonus": 1
+                        },
+                        "price": 75
+                    }
+                ]
+            }
+        },
+        {
+            "team": "Evil",
+            "spawn_position": [
+                4,
+                4
+            ],
+            "shop_position": [
+                4,
+                3
+            ],
+            "shop": {
+                "catalog": [
+                    {
+                        "item": {
+                            "type": "WeaponPickup",
+                            "name": "Weapon",
+                            "value": 100,
+                            "bonus": 10
+                        },
+                        "price": 100
+                    },
+                    {
+                        "item": {
+                            "type": "HealPickup",
+                            "name": "Heal",
+                            "value": 50,
+                            "heal": 10
+                        },
+                        "price": 50
+                    },
+                    {
+                        "item": {
+                            "type": "ItemPickup",
+                            "name": "Speed Scroll",
+                            "value": 75,
+                            "bonus": 1
+                        },
+                        "price": 75
+                    }
+                ]
+            }
+        }
+    ],
+    "spawn_points": [],
+    "lanes": [
+        {
+            "name": "MainLane",
+            "has_bridge": false,
+            "tiles": [
+                [
+                    2,
+                    2
+                ],
+                [
+                    3,
+                    2
+                ]
+            ]
+        }
+    ]
+}
